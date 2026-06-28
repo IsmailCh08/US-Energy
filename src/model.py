@@ -33,6 +33,7 @@ def create_random_forest_pipeline(n_estimators=100):
         ('preprocessor',preprocessor),
         ('model', RandomForestRegressor(n_estimators=n_estimators, random_state=42))
     ])
+    return pipepline
 
 
 def train_model(pipeline, X_train, y_train):

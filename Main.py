@@ -24,27 +24,37 @@ def main():
     print(f"   Test: {X_test.shape[0]} rows")
     
     # 3. Create and train Linear Regression pipeline
-    print("\n🤖 Training Linear Regression...")
+    print("Training Linear Regression...")
     lr_pipeline = create_linear_regression_pipeline()
     lr_pipeline = train_model(lr_pipeline, X_train, y_train)
+    lr_results = evaluate_model(lr_pipeline, X_test, y_test)
+    print(f"   RMSE: {lr_results['rmse']:.2f}")
+    print(f"   MAE:  {lr_results['mae']:.2f}")
+    print(f"   R²:   {lr_results['r2']:.4f}")
 
     # Create and train Random Forest Pipeline
-    print("\n🤖 Training Random Forest...")
-    rf_pipeline = create_linear_regression_pipeline()
+    print("Training Random Forest...")
+    rf_pipeline = create_random_forest_pipeline()
     rf_pipeline = train_model(rf_pipeline, X_train, y_train)
-    
-    # 4. Evaluate
-    print("\n📈 Evaluating...")
-    results = evaluate_model(pipeline, X_test, y_test)
+    rf_results = evaluate_model(rf_pipeline, X_test, y_test)
+    print(f"   RMSE: {rf_results['rmse']:.2f}")
+    print(f"   MAE:  {rf_results['mae']:.2f}")
+    print(f"   R²:   {rf_results['r2']:.4f}")
     
     # 5. Print results
-    print("\n" + "-" * 40)
-    print("RESULTS")
-    print("-" * 40)
-    print(f"   RMSE: {results['rmse']:.2f}")
-    print(f"   MAE:  {results['mae']:.2f}")
-    print(f"   R²:   {results['r2']:.4f}")
-    print("-" * 40)
+    print("\n" + "-" * 60)
+    print("Model Comparison")
+    print("-" * 60)
+    print(f" Linear Regression:")
+    print(f"   RMSE: {lr_results['rmse']:.2f}")
+    print(f"   R²:   {lr_results['r2']:.4f}")
+    print(f" Random Forest:")
+    print(f"   RMSE: {rf_results['rmse']:.2f}")
+    print(f"   R²:   {rf_results['r2']:.4f}")
+
+    improvement = ((lr_results['rmse']- rf_results['rmse'])/ rf_results['rmse']) * 100
+    print(f"Random Forest improves RMSE by {improvement:.1f}%")
+    print("=" * 60)
 
 if __name__ == "__main__":
     main()
