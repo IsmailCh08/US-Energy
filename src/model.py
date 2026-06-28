@@ -2,8 +2,8 @@ from sklearn.linear_model import LinearRegression
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from data_loader import load_data, prepare_data
-from preprocessing import split_time_series
+from .data_loader import load_data, prepare_data
+from .preprocessing import split_time_series
 from sklearn.metrics import root_mean_squared_error, mean_absolute_error, r2_score
 
 df = load_data("Energy_Data.csv")
@@ -13,7 +13,7 @@ X_train, y_train, X_test, y_test = split_time_series(df,target_col='PJME_MW', te
 def create_preprocessor():
     preprocessor = ColumnTransformer([
         ('num', StandardScaler(), ['hour', 'day_of_week', 'month', 'quarter', 'year']),
-        ('cat', OneHotEncoder(), ['is_weekend'])
+        ('cat', OneHotEncoder(), ['weekend','weekday'])
     ])
     return preprocessor
 
