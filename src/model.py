@@ -1,9 +1,7 @@
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import root_mean_squared_error
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.ensemble import RandomForestRegressor
 from data_loader import load_data, prepare_data
 from preprocessing import split_time_series
 from sklearn.metrics import root_mean_squared_error, mean_absolute_error, r2_score
@@ -36,9 +34,7 @@ def train_model(pipeline, X_train, y_train):
 
 
 def evaluate_model(pipeline, X_test, y_test):
-    """
-    Evaluate a trained pipeline on test data.
-    """
+
     predictions = pipeline.predict(X_test)
     
     rmse = root_mean_squared_error(y_test, predictions)
