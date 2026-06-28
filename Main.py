@@ -3,7 +3,8 @@ from src.preprocessing import split_time_series
 from src.model import (
     create_linear_regression_pipeline,
     train_model,
-    evaluate_model
+    evaluate_model,
+    create_random_forest_pipeline
 )
 
 def main():
@@ -22,10 +23,15 @@ def main():
     print(f"   Training: {X_train.shape[0]} rows")
     print(f"   Test: {X_test.shape[0]} rows")
     
-    # 3. Create and train pipeline
+    # 3. Create and train Linear Regression pipeline
     print("\n🤖 Training Linear Regression...")
-    pipeline = create_linear_regression_pipeline()
-    pipeline = train_model(pipeline, X_train, y_train)
+    lr_pipeline = create_linear_regression_pipeline()
+    lr_pipeline = train_model(lr_pipeline, X_train, y_train)
+
+    # Create and train Random Forest Pipeline
+    print("\n🤖 Training Random Forest...")
+    rf_pipeline = create_linear_regression_pipeline()
+    rf_pipeline = train_model(rf_pipeline, X_train, y_train)
     
     # 4. Evaluate
     print("\n📈 Evaluating...")

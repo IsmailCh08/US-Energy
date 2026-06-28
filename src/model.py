@@ -2,6 +2,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.ensemble import RandomForestRegressor
 from .data_loader import load_data, prepare_data
 from .preprocessing import split_time_series
 from sklearn.metrics import root_mean_squared_error, mean_absolute_error, r2_score
@@ -25,6 +26,13 @@ def create_linear_regression_pipeline():
         ('model', LinearRegression())
     ])
     return pipeline
+
+def create_random_forest_pipeline(n_estimators=100):
+    preprocessor = create_preprocessor()
+    pipepline = Pipeline([
+        ('preprocessor',preprocessor),
+        ('model', RandomForestRegressor(n_estimators=n_estimators, random_state=42))
+    ])
 
 
 def train_model(pipeline, X_train, y_train):
