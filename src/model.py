@@ -6,24 +6,48 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.ensemble import RandomForestRegressor
 from data_loader import load_data, prepare_data
 from preprocessing import split_time_series
+from sklearn.metrics import root_mean_squared_error, mean_absolute_error, r2_score
 
 df = load_data("Energy_Data.csv")
 df = prepare_data(df)
 X_train, y_train, X_test, y_test = split_time_series(df,target_col='PJME_MW', test_ratio=0.2)
 
-preprocessor = ColumnTransformer([
-    ('num', StandardScaler(), ['hour', 'day_of_week', 'month','quarter','year']),
-    ('cat', OneHotEncoder(), ['is_weekend'])
-])
+def create_preprocessor():
+    preprocessor = ColumnTransformer([
+        ('num', StandardScaler(), ['hour', 'day_of_week', 'month', 'quarter', 'year']),
+        ('cat', OneHotEncoder(), ['is_weekend'])
+    ])
+    return preprocessor
 
-pipeline = Pipeline([
-    ('preprocessor', preprocessor),
-    ('model',LinearRegression())
-])
+def create_linear_regression_pipeline():
+
+    preprocessor = create_preprocessor()
+    pipeline = Pipeline([
+        ('preprocessor', preprocessor),
+        ('model', LinearRegression())
+    ])
+    return pipeline
 
 
-pipeline.fit(X_train,y_train)
-predictions = pipeline.pred(X_test)
+def train_model(pipeline, X_train, y_train):
 
-rmse = root_mean_squared_error(y_test, predictions)
-print(f"RMSE: {rmse:.2f}")
+    pipeline.fit(X_train, y_train)
+    return pipeline
+
+
+def evaluate_model(pipeline, X_test, y_test):
+    """
+    Evaluate a trained pipeline on test data.
+    """
+    predictions = pipeline.predict(X_test)
+    
+    rmse = root_mean_squared_error(y_test, predictions)
+    mae = mean_absolute_error(y_test, predictions)
+    r2 = r2_score(y_test, predictions)
+    
+    return {
+        'rmse': rmse,
+        'mae': mae,
+        'r2': r2,
+        'predictions': predictions
+    }
