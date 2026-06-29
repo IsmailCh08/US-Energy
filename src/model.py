@@ -7,14 +7,16 @@ from .data_loader import load_data, prepare_data
 from .preprocessing import split_time_series
 from sklearn.metrics import root_mean_squared_error, mean_absolute_error, r2_score
 
+
+# load and prepare data
 df = load_data("Energy_Data.csv")
 df = prepare_data(df)
 X_train, y_train, X_test, y_test = split_time_series(df,target_col='PJME_MW', test_ratio=0.2)
 
+
 def create_preprocessor():
     preprocessor = ColumnTransformer([
-        ('num', StandardScaler(), ['hour', 'day_of_week', 'month', 'quarter', 'year']),
-        ('cat', OneHotEncoder(), ['weekend','weekday'])
+        ('num', StandardScaler(), ['hour', 'day_of_week', 'month', 'quarter', 'year'])
     ])
     return preprocessor
 
