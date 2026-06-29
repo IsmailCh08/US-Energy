@@ -13,13 +13,14 @@ df = load_data("Energy_Data.csv")
 df = prepare_data(df)
 X_train, y_train, X_test, y_test = split_time_series(df,target_col='PJME_MW', test_ratio=0.2)
 
-
+# process and standarize data
 def create_preprocessor():
     preprocessor = ColumnTransformer([
         ('num', StandardScaler(), ['hour', 'day_of_week', 'month', 'quarter', 'year'])
     ])
     return preprocessor
 
+# Create linear regression pipeline
 def create_linear_regression_pipeline():
 
     preprocessor = create_preprocessor()
@@ -29,11 +30,11 @@ def create_linear_regression_pipeline():
     ])
     return pipeline
 
-def create_random_forest_pipeline(n_estimators=100):
+def create_random_forest_pipeline(n_estimators=200):
     preprocessor = create_preprocessor()
     pipepline = Pipeline([
         ('preprocessor',preprocessor),
-        ('model', RandomForestRegressor(n_estimators=n_estimators, random_state=42))
+        ('model', RandomForestRegressor(n_estimators=n_estimators, random_state=42, max_depth=10))
     ])
     return pipepline
 
