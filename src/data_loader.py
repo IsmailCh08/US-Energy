@@ -3,7 +3,7 @@ from pathlib import Path
 
 def load_data(file_path):
     
-    # heck if file exists
+    # check if file exists
     if not Path(file_path).exists():
         print(f" File not found: {file_path}")
         return None 
@@ -18,7 +18,7 @@ def load_data(file_path):
         print(f"Columns cleaned: {df.columns.tolist()}")
         
         # Parse dates
-        df['Datetime'] = pd.to_datetime(df['Datetime'])
+        df['Datetime'] = pd.to_datetime(df['Datetime']) 
         print(f"Dates parsed")
         
         # Set as index
@@ -34,17 +34,21 @@ def load_data(file_path):
 
 def prepare_data(df):
 
+    # create new features for data
+
+    # Daily
     df['hour'] = df.index.hour
     df['is_morning']= (df['hour'] >= 6) & (df['hour'] <= 11)
     df['is_afternoon'] = (df['hour'] >= 12) & (df['hour'] <= 17)
     df['is_evening'] = (df['hour'] >= 18) & (df['hour'] < 22)
     df['is_night'] = (df['hour'] >= 22) | (df['hour'] < 6)
 
-
+    # Weekly
     df['day_of_week'] = df.index.dayofweek
     df['weekend'] = df['day_of_week'] >= 5
     df['weekday'] = df['day_of_week'] < 5
 
+    # Monthly
     df['month'] = df.index.month
     df['year'] =  df.index.year
     df['quarter'] = df.index.quarter
