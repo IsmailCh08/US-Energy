@@ -30,11 +30,11 @@ def create_linear_regression_pipeline():
     ])
     return pipeline
 
-def create_random_forest_pipeline(n_estimators=200):
+def create_random_forest_pipeline(n_estimators=200, max_depth=10):
     preprocessor = create_preprocessor()
     pipepline = Pipeline([
         ('preprocessor',preprocessor),
-        ('model', RandomForestRegressor(n_estimators=n_estimators, random_state=42, max_depth=10))
+        ('model', RandomForestRegressor(n_estimators=n_estimators, random_state=42, max_depth=max_depth))
     ])
     return pipepline
 
