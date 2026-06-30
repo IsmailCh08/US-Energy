@@ -7,6 +7,7 @@ from .data_loader import load_data, prepare_data
 from .preprocessing import split_time_series
 from sklearn.metrics import root_mean_squared_error, mean_absolute_error, r2_score
 from xgboost import XGBRegressor
+from sklearn.model_selection import GridSearchCV
 
 # load and prepare data
 df = load_data("Energy_Data.csv")
@@ -30,21 +31,33 @@ def create_linear_regression_pipeline():
     ])
     return pipeline
 
-def create_random_forest_pipeline(n_estimators=200, max_depth=10):
+def create_random_forest_pipeline(n_estimators=200, max_depth=10, random_state=42):
     preprocessor = create_preprocessor()
     pipepline = Pipeline([
         ('preprocessor',preprocessor),
-        ('model', RandomForestRegressor(n_estimators=n_estimators, random_state=42, max_depth=max_depth))
+        ('model', RandomForestRegressor(n_estimators=n_estimators, random_state=random_state, max_depth=max_depth))
     ])
     return pipepline
 
-def create_XGBoost_pipeline(n_estimators=100, learning_rate=0.1, random_state=42, max_depth=6):
+def create_XGBoost_pipeline(n_estimators=150, learning_rate=0.05, random_state=42, max_depth=4):
     preprocessor = create_preprocessor()
     pipeline = Pipeline([
         ('preprocessor', preprocessor),
         ('model', XGBRegressor(n_estimators=n_estimators,learning_rate=learning_rate,random_state=random_state, max_depth=max_depth))
     ])
     return pipeline
+
+def tune_XBGoost(X_train,y_train):
+
+    preprocessor = create_preprocessor
+
+    param_grid = {
+        'model__n_estimators': [100, 200, 300],
+        'model__learning_rate': [0.01, 0.05, 0.1],
+        'model__max_depth': [3, 5, 7],
+        'model__reg_alpha': [0, 0.1, 1],
+        'model__reg_lambda': [1, 5, 10]
+    }
 
 
 def train_model(pipeline, X_train, y_train):
