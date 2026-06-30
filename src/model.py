@@ -7,7 +7,7 @@ from .data_loader import load_data, prepare_data
 from .preprocessing import split_time_series
 from sklearn.metrics import root_mean_squared_error, mean_absolute_error, r2_score
 from xgboost import XGBRegressor
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import RandomizedSearchCV
 
 # load and prepare data
 df = load_data("Energy_Data.csv")
@@ -47,9 +47,9 @@ def create_XGBoost_pipeline(n_estimators=150, learning_rate=0.05, random_state=4
     ])
     return pipeline
 
-def tune_XBGoost(X_train,y_train):
+def tune_XGBoost(X_train,y_train):
 
-    preprocessor = create_preprocessor
+    preprocessor = create_preprocessor()
 
     param_grid = {
         'model__n_estimators': [100, 200, 300],
@@ -58,6 +58,28 @@ def tune_XBGoost(X_train,y_train):
         'model__reg_alpha': [0, 0.1, 1],
         'model__reg_lambda': [1, 5, 10]
     }
+
+    pipeline = Pipeline([
+        ('preprocessor', create_preprocessor()),
+        ('model', XGBRegressor(random_state=42, verbosity=0))
+    ])
+
+    random_search = RandomizedSearchCV(
+    pipeline,
+    param_distributions=param_grid,
+    n_iter=20,  # Try 20 random combos instead of all
+    cv=5,
+    scoring='neg_root_mean_squared_error',
+    n_jobs=-1,
+    random_state=42
+)
+
+    random_search.fit(X_train, y_train)
+    
+    print(f"Best parameters: {random_search.best_params_}")
+    print(f"Best RMSE (cross-validated): {-random_search.best_score_:.2f}")
+    
+    return random_search.best_estimator_
 
 
 def train_model(pipeline, X_train, y_train):

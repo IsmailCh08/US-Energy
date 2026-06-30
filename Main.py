@@ -5,7 +5,8 @@ from src.model import (
     train_model,
     evaluate_model,
     create_random_forest_pipeline,
-    create_XGBoost_pipeline
+    create_XGBoost_pipeline,
+    tune_XGBoost
 )
 
 def main():
@@ -42,32 +43,59 @@ def main():
     print(f"   MAE:  {rf_results['mae']:.2f}")
     print(f"   R²:   {rf_results['r2']:.4f}")
 
-    # Create and train XGBoost pipeline
-    print("Training XGBoost...")
-    xg_pipeline = create_XGBoost_pipeline()
-    xg_pipeline = train_model(xg_pipeline, X_train, y_train)
-    xg_results = evaluate_model(xg_pipeline, X_test, y_test)
+    # Create and Tune XGBoost pipeline
+    print("Tuning XGBoost with Grid Search + Cross-Validation...")
+    best_xgb_pipeline = tune_XGBoost(X_train, y_train)
+
+    xg_results = evaluate_model(best_xgb_pipeline, X_test, y_test)
+    print(f"Tuned XGBoost Results:")
     print(f"   RMSE: {xg_results['rmse']:.2f}")
     print(f"   MAE:  {xg_results['mae']:.2f}")
     print(f"   R²:   {xg_results['r2']:.4f}")
     
-    # 5. Print results
-    print("\n" + "-" * 60)
-    print("Model Comparison")
-    print("-" * 60)
-    print(f" Linear Regression:")
-    print(f"   RMSE: {lr_results['rmse']:.2f}")
-    print(f"   R²:   {lr_results['r2']:.4f}")
-    print(f" Random Forest:")
-    print(f"   RMSE: {rf_results['rmse']:.2f}")
-    print(f"   R²:   {rf_results['r2']:.4f}")
-    print(f" XGBoost: ")
-    print(f"   RMSE: {xg_results['rmse']:.2f}")
-    print(f"   R²:   {xg_results['r2']:.4f}")
+    models = {
+    'Linear Regression': lr_results['rmse'],
+    'Random Forest': rf_results['rmse'],
+    'Tuned XGBoost': xg_results['rmse']
+    }
 
-    improvement = ((rf_results['rmse']- xg_results['rmse'])/ xg_results['rmse']) * 100
-    print(f"XGBoost improves RMSE by {improvement:.1f}%")
-    print("=" * 60)
+    best = min(models, key=models.get)
+    print(f" Best model: {best} with RMSE: {models[best]:.2f}")
+
+    
+    xgb_model = best_xgb_pipeline.named_steps['model']
+
+
+    feature_importance = xgb_model.feature_importances_
+
+
+    feature_names = best_xgb_pipeline.named_steps['preprocessor'].get_feature_names_out()
+
+
+    importance_df = pd.DataFrame({
+        'feature': feature_names,
+        'importance': feature_importance
+    }).sort_values('importance', ascending=False)
+
+
+    print("\n🔍 Top 10 Most Important Features:")
+    print("=" * 40)
+    for i, row in importance_df.head(10).iterrows():
+        print(f"{row['feature']:25} : {row['importance']:.4f}")
+
+
+    plt.figure(figsize=(12, 8))
+    top_features = importance_df.head(10)
+    plt.barh(top_features['feature'], top_features['importance'], color='steelblue')
+    plt.xlabel('Feature Importance')
+    plt.title('Top 10 Features - XGBoost')
+    plt.gca().invert_yaxis()
+    plt.tight_layout()
+    plt.show()
+
+    # improvement = ((rf_results['rmse']- xg_results['rmse'])/ xg_results['rmse']) * 100
+    # print(f"XGBoost improves RMSE by {improvement:.1f}%")
+    # print("=" * 60)
 
 if __name__ == "__main__":
     main()
