@@ -17,16 +17,17 @@ class LTSMModel(nn.Module):
         self.fc = nn.Linear(hidden_size, output_size) # hidden size --> output size
     
     def forward(self,x):
-        # pass the input though the LSTM
+        # take input and using LSTM create it into 64 hidden values
         out, _ = self.lstm(x)
 
-        # take only the last output
+        # Dont need all 24 hours, just current one to predict
         out = out[:, -1, :]
 
-        # apply dropout
+        # apply dropout to hidden values (so it doesnt overfit)
         out = self.dropout(out)
 
         # convert to pred
         out = self.fc(out)
 
         return out
+    
