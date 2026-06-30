@@ -31,23 +31,18 @@ class LTSMModel(nn.Module):
 
         return out
     
-def train_lstm(model, X_train, y_train, epochs=20, batch_size=256, lr=0.001):
-    device = torch.device("cpu")
-    print(f"Using: {device}")
+def train_lstm(model, X_train, y_train, epochs=5, batch_size=32, lr=0.001):
+    device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+    print(f"Using device: {device}")
     
     model = model.to(device)
     criterion = nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
-    # shuffle once in numpy BEFORE converting to tensor
-    perm = np.random.permutation(len(X_train))
-    X_train = X_train[perm]
-    y_train = y_train[perm]
-
-    X_train_t = torch.from_numpy(X_train.astype(np.float32))
-    y_train_t = torch.from_numpy(y_train.astype(np.float32))
-    print(f"Tensors created: {X_train_t.shape}")
-
+    # Move data to the SAME device
+    X_train_t = torch.from_numpy(X_train.astype(np.float32)).to(device)
+    y_train_t = torch.from_numpy(y_train.astype(np.float32)).to(device)
+    
     n_samples = X_train_t.shape[0]
     n_batches = n_samples // batch_size
     print(f"Training with {n_batches} batches per epoch")
@@ -60,6 +55,7 @@ def train_lstm(model, X_train, y_train, epochs=20, batch_size=256, lr=0.001):
             start = i * batch_size
             end = start + batch_size
 
+            # Already on the right device
             batch_X = X_train_t[start:end]
             batch_y = y_train_t[start:end]
 
@@ -70,7 +66,7 @@ def train_lstm(model, X_train, y_train, epochs=20, batch_size=256, lr=0.001):
             optimizer.step()
             epoch_loss += loss.item()
 
-            if i % 50 == 0:
+            if i % 10 == 0:
                 print(f"  Epoch {epoch+1}/{epochs} | Batch {i}/{n_batches} | Loss: {loss.item():.6f}")
 
         print(f"Epoch {epoch+1} complete | Avg Loss: {epoch_loss/n_batches:.6f}")
@@ -113,12 +109,14 @@ def prepare_lstm_data(df, target_col='PJME_MW', seq_length=24, test_ratio=0.2):
 
 
 def evaluate_lstm(model, X_test, y_test, scaler):
-    device = next(model.parameters()).device  # wherever model lives
+    device = next(model.parameters()).device  # Get the model's device
     model.eval()
-    X_test_t = torch.FloatTensor(X_test).to(device)
+    
+    # Move test data to the SAME device
+    X_test_t = torch.from_numpy(X_test.astype(np.float32)).to(device)
     
     with torch.no_grad():
-        predictions_scaled = model(X_test_t).cpu().numpy()  # pull back to CPU for numpy
+        predictions_scaled = model(X_test_t).cpu().numpy()  # Back to CPU for numpy
     
     predictions = scaler.inverse_transform(predictions_scaled)
     y_test_original = scaler.inverse_transform(y_test)
