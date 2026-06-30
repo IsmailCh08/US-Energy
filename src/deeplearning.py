@@ -31,14 +31,41 @@ class LTSMModel(nn.Module):
 
         return out
     
-    def train_lstm(model, X_train, y_train, X_test, y_test, epochs=50, batch_size=32, lr=0.001):
-        # loss function
-        criterion = nn.MSELoss()
+def train_lstm(model, X_train, y_train, X_test, y_test, epochs=50, batch_size=32, lr=0.001):
+    # loss function
+    criterion = nn.MSELoss()
         
-        # optimizer
-        optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    # optimizer
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
-        # data loader
-        train_dataset = torch.utils.data.TensorDataset(X_train,y_train)
-        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    # data loader
+    train_dataset = torch.utils.data.TensorDataset(X_train,y_train)
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+
+    # training loop
+    for epoch in range(epochs):
+        model.train()  # Set to training mode
+        epoch_loss = 0
         
+        for batch_X, batch_y in train_loader:
+        # Forward pass: make predictions
+            output = model(batch_X)
+            
+        # Calculate loss: how wrong are we?
+            loss = criterion(output, batch_y)
+            
+        # Backward pass: calculate gradients
+            optimizer.zero_grad()
+            loss.backward()
+            
+        # Update weights
+            optimizer.step()
+            
+            epoch_loss += loss.item()
+        
+    # Print progress every 10 epochs
+        if (epoch + 1) % 10 == 0:
+            print(f"Epoch {epoch+1}/{epochs} - Loss: {epoch_loss/len(train_loader):.6f}")
+    
+    return model
+    
