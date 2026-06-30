@@ -1,4 +1,6 @@
 from src.data_loader import load_data, prepare_data
+import pandas as pd
+import matplotlib.pyplot as plt
 from src.preprocessing import split_time_series
 from src.model import (
     create_linear_regression_pipeline,
@@ -78,7 +80,7 @@ def main():
     }).sort_values('importance', ascending=False)
 
 
-    print("\n🔍 Top 10 Most Important Features:")
+    print(" Top 10 Most Important Features:")
     print("=" * 40)
     for i, row in importance_df.head(10).iterrows():
         print(f"{row['feature']:25} : {row['importance']:.4f}")
