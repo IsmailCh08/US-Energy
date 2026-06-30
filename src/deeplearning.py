@@ -31,42 +31,50 @@ class LTSMModel(nn.Module):
 
         return out
     
-def train_lstm(model, X_train, y_train, X_test, y_test, epochs=50, batch_size=32, lr=0.001):
-    # loss function
+def train_lstm(model, X_train, y_train, epochs=20, batch_size=256, lr=0.001):
+    device = torch.device("cpu")
+    print(f"Using: {device}")
+    
+    model = model.to(device)
     criterion = nn.MSELoss()
-        
-    # optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
-    # data loader
-    train_dataset = torch.utils.data.TensorDataset(X_train,y_train)
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    # shuffle once in numpy BEFORE converting to tensor
+    perm = np.random.permutation(len(X_train))
+    X_train = X_train[perm]
+    y_train = y_train[perm]
 
-    # training loop
+    X_train_t = torch.from_numpy(X_train.astype(np.float32))
+    y_train_t = torch.from_numpy(y_train.astype(np.float32))
+    print(f"Tensors created: {X_train_t.shape}")
+
+    n_samples = X_train_t.shape[0]
+    n_batches = n_samples // batch_size
+    print(f"Training with {n_batches} batches per epoch")
+
     for epoch in range(epochs):
-        model.train()  # Set to training mode
+        model.train()
         epoch_loss = 0
-        
-        for batch_X, batch_y in train_loader:
-        # Forward pass: make predictions
+
+        for i in range(n_batches):
+            start = i * batch_size
+            end = start + batch_size
+
+            batch_X = X_train_t[start:end]
+            batch_y = y_train_t[start:end]
+
             output = model(batch_X)
-            
-        # Calculate loss: how wrong are we?
             loss = criterion(output, batch_y)
-            
-        # Backward pass: calculate gradients
             optimizer.zero_grad()
             loss.backward()
-            
-        # Update weights
             optimizer.step()
-            
             epoch_loss += loss.item()
-        
-    # Print progress every 10 epochs
-        if (epoch + 1) % 10 == 0:
-            print(f"Epoch {epoch+1}/{epochs} - Loss: {epoch_loss/len(train_loader):.6f}")
-    
+
+            if i % 50 == 0:
+                print(f"  Epoch {epoch+1}/{epochs} | Batch {i}/{n_batches} | Loss: {loss.item():.6f}")
+
+        print(f"Epoch {epoch+1} complete | Avg Loss: {epoch_loss/n_batches:.6f}")
+
     return model
     
 def create_sequences(data, seq_length=24):
@@ -105,19 +113,15 @@ def prepare_lstm_data(df, target_col='PJME_MW', seq_length=24, test_ratio=0.2):
 
 
 def evaluate_lstm(model, X_test, y_test, scaler):
-    # set to evaluation mode
+    device = next(model.parameters()).device  # wherever model lives
     model.eval()
-    X_test_t = torch.FloatTensor(X_test)
+    X_test_t = torch.FloatTensor(X_test).to(device)
     
-    # make predictions
     with torch.no_grad():
-        predictions_scaled = model(X_test_t).numpy()
+        predictions_scaled = model(X_test_t).cpu().numpy()  # pull back to CPU for numpy
     
-    # inverse transform to original scale
     predictions = scaler.inverse_transform(predictions_scaled)
     y_test_original = scaler.inverse_transform(y_test)
-    
-    # calculate rmse
     rmse = np.sqrt(np.mean((predictions.flatten() - y_test_original.flatten()) ** 2))
     
     return predictions, y_test_original, rmse

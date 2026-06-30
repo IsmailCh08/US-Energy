@@ -11,6 +11,7 @@ from src.model import (
     tune_XGBoost
 )
 from src.deeplearning import LTSMModel, prepare_lstm_data, train_lstm, evaluate_lstm
+
 def main():
     print("=" * 60)
     print("Energy Prediction Model")
@@ -36,7 +37,7 @@ def main():
     print(f"   MAE:  {lr_results['mae']:.2f}")
     print(f"   R²:   {lr_results['r2']:.4f}")
 
-    # Create and train Random Forest Pipeline
+    # 4. Create and train Random Forest Pipeline
     print("Training Random Forest...")
     rf_pipeline = create_random_forest_pipeline()
     rf_pipeline = train_model(rf_pipeline, X_train, y_train)
@@ -45,7 +46,7 @@ def main():
     print(f"   MAE:  {rf_results['mae']:.2f}")
     print(f"   R²:   {rf_results['r2']:.4f}")
 
-    # Create and Tune XGBoost pipeline
+    # 5. Create and Tune XGBoost pipeline
     print("Tuning XGBoost with Grid Search + Cross-Validation...")
     best_xgb_pipeline = tune_XGBoost(X_train, y_train)
 
@@ -54,53 +55,65 @@ def main():
     print(f"   RMSE: {xg_results['rmse']:.2f}")
     print(f"   MAE:  {xg_results['mae']:.2f}")
     print(f"   R²:   {xg_results['r2']:.4f}")
-    
+
+    # 6. LSTM
+    print("Preparing LSTM data...")
+    seq_length = 24
+    X_train_lstm, X_test_lstm, y_train_lstm, y_test_lstm, scaler = prepare_lstm_data(
+        df, seq_length=seq_length
+    )
+
+    print("Creating LSTM model...")
+    lstm_model = LTSMModel(input_size=1, hidden_size=64, num_layers=2, output_size=1)
+
+    print("Training LSTM...")
+    lstm_model = train_lstm(lstm_model, X_train_lstm, y_train_lstm, epochs=50)
+
+    print("Evaluating LSTM...")
+    predictions, y_test_original, lstm_rmse = evaluate_lstm(lstm_model, X_test_lstm, y_test_lstm, scaler)
+    print(f"   LSTM RMSE: {lstm_rmse:.2f}")
+
+    # 7. Model Comparison
     models = {
-    'Linear Regression': lr_results['rmse'],
-    'Random Forest': rf_results['rmse'],
-    'Tuned XGBoost': xg_results['rmse'],
-    'lstm' : lstm_rmse
+        'Linear Regression': lr_results['rmse'],
+        'Random Forest': rf_results['rmse'],
+        'Tuned XGBoost': xg_results['rmse'],
+        'LSTM': lstm_rmse
     }
 
+    print("\n" + "=" * 60)
+    print("Final Model Comparison")
+    print("=" * 60)
+    for name, rmse in models.items():
+        print(f"{name}: {rmse:.2f}")
+
     best = min(models, key=models.get)
-    print(f" Best model: {best} with RMSE: {models[best]:.2f}")
+    print(f"Best model: {best} with RMSE: {models[best]:.2f}")
 
-    
+    # 8. Feature Importance (XGBoost)
     xgb_model = best_xgb_pipeline.named_steps['model']
-
-
     feature_importance = xgb_model.feature_importances_
-
-
     feature_names = best_xgb_pipeline.named_steps['preprocessor'].get_feature_names_out()
-
 
     importance_df = pd.DataFrame({
         'feature': feature_names,
         'importance': feature_importance
     }).sort_values('importance', ascending=False)
 
-
-    print(" Top 10 Most Important Features:")
+    print("\nTop 10 Most Important Features:")
     print("=" * 40)
     for i, row in importance_df.head(10).iterrows():
         print(f"{row['feature']:25} : {row['importance']:.4f}")
 
-
-    plt.figure(figsize=(12, 8))
-    top_features = importance_df.head(10)
-    plt.barh(top_features['feature'], top_features['importance'], color='steelblue')
-    plt.xlabel('Feature Importance')
-    plt.title('Top 10 Features - XGBoost')
-    plt.gca().invert_yaxis()
-    plt.tight_layout()
-    plt.show()
-
-    # improvement = ((rf_results['rmse']- xg_results['rmse'])/ xg_results['rmse']) * 100
-    # print(f"XGBoost improves RMSE by {improvement:.1f}%")
-    # print("=" * 60)
+    # graph commented out
+    # plt.figure(figsize=(12, 8))
+    # top_features = importance_df.head(10)
+    # plt.barh(top_features['feature'], top_features['importance'], color='steelblue')
+    # plt.xlabel('Feature Importance')
+    # plt.title('Top 10 Features - XGBoost')
+    # plt.gca().invert_yaxis()
+    # plt.tight_layout()
+    # plt.show()
 
 if __name__ == "__main__":
     main()
-
-    
