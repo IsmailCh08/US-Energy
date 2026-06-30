@@ -44,6 +44,7 @@ def create_XGBoost_pipeline(n_estimators=100, learning_rate=0.1, random_state=42
         ('preprocessor', preprocessor),
         ('model', XGBRegressor(n_estimators=n_estimators,learning_rate=learning_rate,random_state=random_state, max_depth=max_depth))
     ])
+    return pipeline
 
 
 def train_model(pipeline, X_train, y_train):

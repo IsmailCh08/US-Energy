@@ -44,6 +44,12 @@ def main():
 
     # Create and train XGBoost pipeline
     print("Training XGBoost...")
+    xg_pipeline = create_XGBoost_pipeline()
+    xg_pipeline = train_model(xg_pipeline, X_train, y_train)
+    xg_results = evaluate_model(xg_pipeline, X_test, y_test)
+    print(f"   RMSE: {xg_results['rmse']:.2f}")
+    print(f"   MAE:  {xg_results['mae']:.2f}")
+    print(f"   R²:   {xg_results['r2']:.4f}")
     
     # 5. Print results
     print("\n" + "-" * 60)
@@ -55,9 +61,12 @@ def main():
     print(f" Random Forest:")
     print(f"   RMSE: {rf_results['rmse']:.2f}")
     print(f"   R²:   {rf_results['r2']:.4f}")
+    print(f" XGBoost: ")
+    print(f"   RMSE: {xg_results['rmse']:.2f}")
+    print(f"   R²:   {xg_results['r2']:.4f}")
 
-    improvement = ((lr_results['rmse']- rf_results['rmse'])/ rf_results['rmse']) * 100
-    print(f"Random Forest improves RMSE by {improvement:.1f}%")
+    improvement = ((rf_results['rmse']- xg_results['rmse'])/ xg_results['rmse']) * 100
+    print(f"XGBoost improves RMSE by {improvement:.1f}%")
     print("=" * 60)
 
 if __name__ == "__main__":
