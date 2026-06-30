@@ -6,7 +6,7 @@ from sklearn.ensemble import RandomForestRegressor
 from .data_loader import load_data, prepare_data
 from .preprocessing import split_time_series
 from sklearn.metrics import root_mean_squared_error, mean_absolute_error, r2_score
-
+from xgboost import XGBRegressor
 
 # load and prepare data
 df = load_data("Energy_Data.csv")
@@ -37,6 +37,13 @@ def create_random_forest_pipeline(n_estimators=200, max_depth=10):
         ('model', RandomForestRegressor(n_estimators=n_estimators, random_state=42, max_depth=max_depth))
     ])
     return pipepline
+
+def create_XGBoost_pipeline(n_estimators=100, learning_rate=0.1, random_state=42, max_depth=6):
+    preprocessor = create_preprocessor()
+    pipeline = Pipeline([
+        ('preprocessor', preprocessor),
+        ('model', XGBRegressor(n_estimators=n_estimators,learning_rate=learning_rate,random_state=random_state, max_depth=max_depth))
+    ])
 
 
 def train_model(pipeline, X_train, y_train):

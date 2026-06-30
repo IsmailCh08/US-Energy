@@ -4,7 +4,8 @@ from src.model import (
     create_linear_regression_pipeline,
     train_model,
     evaluate_model,
-    create_random_forest_pipeline
+    create_random_forest_pipeline,
+    create_XGBoost_pipeline
 )
 
 def main():
@@ -40,6 +41,9 @@ def main():
     print(f"   RMSE: {rf_results['rmse']:.2f}")
     print(f"   MAE:  {rf_results['mae']:.2f}")
     print(f"   R²:   {rf_results['r2']:.4f}")
+
+    # Create and train XGBoost pipeline
+    print("Training XGBoost...")
     
     # 5. Print results
     print("\n" + "-" * 60)
