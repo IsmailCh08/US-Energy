@@ -31,3 +31,14 @@ class LTSMModel(nn.Module):
 
         return out
     
+    def train_lstm(model, X_train, y_train, X_test, y_test, epochs=50, batch_size=32, lr=0.001):
+        # loss function
+        criterion = nn.MSELoss()
+        
+        # optimizer
+        optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+
+        # data loader
+        train_dataset = torch.utils.data.TensorDataset(X_train,y_train)
+        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+        
