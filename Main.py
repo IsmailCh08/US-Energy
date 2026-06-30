@@ -10,7 +10,7 @@ from src.model import (
     create_XGBoost_pipeline,
     tune_XGBoost
 )
-
+from src.deeplearning import LTSMModel, prepare_lstm_data, train_lstm, evaluate_lstm
 def main():
     print("=" * 60)
     print("Energy Prediction Model")
@@ -58,7 +58,8 @@ def main():
     models = {
     'Linear Regression': lr_results['rmse'],
     'Random Forest': rf_results['rmse'],
-    'Tuned XGBoost': xg_results['rmse']
+    'Tuned XGBoost': xg_results['rmse'],
+    'lstm' : lstm_rmse
     }
 
     best = min(models, key=models.get)
