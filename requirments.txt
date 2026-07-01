@@ -1,8 +1,8 @@
-torch
-numpy
+streamlit
 pandas
+numpy
+matplotlib
 scikit-learn
 xgboost
-streamlit
+torch
 joblib
-matplotlib
