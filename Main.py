@@ -17,12 +17,12 @@ def main():
     print("Energy Prediction Model")
     print("=" * 60)
     
-    # 1. Load and prepare
+    # Load and prepare
     print("\n Loading data...")
     df = load_data("Energy_Data.csv")
     df = prepare_data(df)
     
-    # 2. Split
+    # Split
     print("\n Splitting data...")
     X_train, y_train, X_test, y_test = split_time_series(df, target_col='PJME_MW', test_ratio=0.2)
     print(f"   Training: {X_train.shape[0]} rows")
@@ -37,7 +37,7 @@ def main():
     print(f"   MAE:  {lr_results['mae']:.2f}")
     print(f"   R²:   {lr_results['r2']:.4f}")
 
-    # 4. Create and train Random Forest Pipeline
+    # Create and train Random Forest Pipeline
     print("Training Random Forest...")
     rf_pipeline = create_random_forest_pipeline()
     rf_pipeline = train_model(rf_pipeline, X_train, y_train)
@@ -46,7 +46,7 @@ def main():
     print(f"   MAE:  {rf_results['mae']:.2f}")
     print(f"   R²:   {rf_results['r2']:.4f}")
 
-    # 5. Create and Tune XGBoost pipeline
+    # Create and Tune XGBoost pipeline
     print("Tuning XGBoost with Grid Search + Cross-Validation...")
     best_xgb_pipeline = tune_XGBoost(X_train, y_train)
 
@@ -57,7 +57,7 @@ def main():
     print(f"   R²:   {xg_results['r2']:.4f}")
 
 
-    # 6. LSTM
+    # LSTM calling
     print("Preparing LSTM data...")
     seq_length = 24
     X_train_lstm, X_test_lstm, y_train_lstm, y_test_lstm, scaler = prepare_lstm_data(
@@ -74,7 +74,7 @@ def main():
     predictions, y_test_original, lstm_rmse = evaluate_lstm(lstm_model, X_test_lstm, y_test_lstm, scaler)
     print(f"   LSTM RMSE: {lstm_rmse:.2f}")
 
-    # 7. Model Comparison
+    # Model Comparison
     models = {
         'Linear Regression': lr_results['rmse'],
         'Random Forest': rf_results['rmse'],
@@ -92,7 +92,7 @@ def main():
     print(f"Best model: {best} with RMSE: {models[best]:.2f}")
 
     
-    # 8. Feature Importance (XGBoost)
+    # Feature Importance (XGBoost)
     xgb_model = best_xgb_pipeline.named_steps['model']
     feature_importance = xgb_model.feature_importances_
     feature_names = best_xgb_pipeline.named_steps['preprocessor'].get_feature_names_out()
@@ -102,7 +102,7 @@ def main():
         'importance': feature_importance
     }).sort_values('importance', ascending=False)
 
-    print("\nTop 10 Most Important Features:")
+    print(" Top 10 Most Important Features:")
     print("=" * 40)
     for i, row in importance_df.head(10).iterrows():
         print(f"{row['feature']:25} : {row['importance']:.4f}")

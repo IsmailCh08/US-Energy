@@ -32,9 +32,11 @@ class LTSMModel(nn.Module):
         return out
     
 def train_lstm(model, X_train, y_train, epochs=50, batch_size=32, lr=0.001):
+    # Use mps if available if not fall back to cpu
     device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
     print(f"Using device: {device}")
     
+    # both model and data need to be on device
     model = model.to(device)
     criterion = nn.MSELoss() # loss function 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr) # optimize loss
