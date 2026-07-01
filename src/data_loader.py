@@ -25,7 +25,7 @@ def load_data(file_path):
         df = df.set_index('Datetime')
         print(f"Index set")
         
-        # RETURN the DataFrame
+        # Return the DataFrame
         return df  
         
     except Exception as e:

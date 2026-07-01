@@ -31,13 +31,13 @@ class LTSMModel(nn.Module):
 
         return out
     
-def train_lstm(model, X_train, y_train, epochs=5, batch_size=32, lr=0.001):
+def train_lstm(model, X_train, y_train, epochs=50, batch_size=32, lr=0.001):
     device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
     print(f"Using device: {device}")
     
     model = model.to(device)
-    criterion = nn.MSELoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    criterion = nn.MSELoss() # loss function 
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr) # optimize loss
 
     # Move data to the SAME device
     X_train_t = torch.from_numpy(X_train.astype(np.float32)).to(device)
@@ -49,13 +49,14 @@ def train_lstm(model, X_train, y_train, epochs=5, batch_size=32, lr=0.001):
 
     for epoch in range(epochs):
         model.train()
+        # reset loss
         epoch_loss = 0
 
         for i in range(n_batches):
             start = i * batch_size
             end = start + batch_size
 
-            # Already on the right device
+            
             batch_X = X_train_t[start:end]
             batch_y = y_train_t[start:end]
 

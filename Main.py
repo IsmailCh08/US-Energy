@@ -56,20 +56,19 @@ def main():
     print(f"   MAE:  {xg_results['mae']:.2f}")
     print(f"   R²:   {xg_results['r2']:.4f}") '''
 
-    df_sample = df.iloc[:50000] 
 
     # 6. LSTM
     print("Preparing LSTM data...")
     seq_length = 24
     X_train_lstm, X_test_lstm, y_train_lstm, y_test_lstm, scaler = prepare_lstm_data(
-        df_sample, seq_length=seq_length
+        df, seq_length=seq_length
     )
 
     print("Creating LSTM model...")
     lstm_model = LTSMModel(input_size=1, hidden_size=64, num_layers=2, output_size=1)
 
     print("Training LSTM...")
-    lstm_model = train_lstm(lstm_model, X_train_lstm, y_train_lstm, epochs=5)
+    lstm_model = train_lstm(lstm_model, X_train_lstm, y_train_lstm, epochs=50)
 
     print("Evaluating LSTM...")
     predictions, y_test_original, lstm_rmse = evaluate_lstm(lstm_model, X_test_lstm, y_test_lstm, scaler)

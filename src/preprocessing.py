@@ -9,7 +9,6 @@ def split_time_series(df,target_col='PJME_MW', test_ratio=0.2):
 
     # prevent data leakage
 
-
     X_train = train.drop(columns=[target_col])
     X_test = test.drop(columns=[target_col])
 
