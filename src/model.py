@@ -9,11 +9,6 @@ from sklearn.metrics import root_mean_squared_error, mean_absolute_error, r2_sco
 from xgboost import XGBRegressor
 from sklearn.model_selection import RandomizedSearchCV
 
-# load and prepare data
-df = load_data("Energy_Data.csv")
-df = prepare_data(df)
-X_train, y_train, X_test, y_test = split_time_series(df,target_col='PJME_MW', test_ratio=0.2)
-
 # process and standarize data
 def create_preprocessor():
     preprocessor = ColumnTransformer([

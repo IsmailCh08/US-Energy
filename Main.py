@@ -2,6 +2,8 @@ from src.data_loader import load_data, prepare_data
 import pandas as pd
 import matplotlib.pyplot as plt
 from src.preprocessing import split_time_series
+import joblib
+import torch
 from src.model import (
     create_linear_regression_pipeline,
     train_model,
@@ -107,6 +109,11 @@ def main():
     for i, row in importance_df.head(10).iterrows():
         print(f"{row['feature']:25} : {row['importance']:.4f}")
 
+    # Save sklearn models
+    joblib.dump(best_xgb_pipeline, 'models/xgb_model.pkl')
+
+    # Save LSTM
+    torch.save(lstm_model.state_dict(), 'models/lstm_model.pth')
 
 if __name__ == "__main__":
     main()
