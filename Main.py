@@ -46,7 +46,7 @@ def main():
     print(f"   MAE:  {rf_results['mae']:.2f}")
     print(f"   R²:   {rf_results['r2']:.4f}")
 
-    ''' # 5. Create and Tune XGBoost pipeline
+    # 5. Create and Tune XGBoost pipeline
     print("Tuning XGBoost with Grid Search + Cross-Validation...")
     best_xgb_pipeline = tune_XGBoost(X_train, y_train)
 
@@ -54,7 +54,7 @@ def main():
     print(f"Tuned XGBoost Results:")
     print(f"   RMSE: {xg_results['rmse']:.2f}")
     print(f"   MAE:  {xg_results['mae']:.2f}")
-    print(f"   R²:   {xg_results['r2']:.4f}") '''
+    print(f"   R²:   {xg_results['r2']:.4f}")
 
 
     # 6. LSTM
@@ -78,7 +78,7 @@ def main():
     models = {
         'Linear Regression': lr_results['rmse'],
         'Random Forest': rf_results['rmse'],
-        # 'Tuned XGBoost': xg_results['rmse'],
+        'Tuned XGBoost': xg_results['rmse'],
         'LSTM': lstm_rmse
     }
 
@@ -91,7 +91,7 @@ def main():
     best = min(models, key=models.get)
     print(f"Best model: {best} with RMSE: {models[best]:.2f}")
 
-    '''
+    
     # 8. Feature Importance (XGBoost)
     xgb_model = best_xgb_pipeline.named_steps['model']
     feature_importance = xgb_model.feature_importances_
@@ -105,17 +105,8 @@ def main():
     print("\nTop 10 Most Important Features:")
     print("=" * 40)
     for i, row in importance_df.head(10).iterrows():
-        print(f"{row['feature']:25} : {row['importance']:.4f}") '''
+        print(f"{row['feature']:25} : {row['importance']:.4f}")
 
-    # graph commented out
-    # plt.figure(figsize=(12, 8))
-    # top_features = importance_df.head(10)
-    # plt.barh(top_features['feature'], top_features['importance'], color='steelblue')
-    # plt.xlabel('Feature Importance')
-    # plt.title('Top 10 Features - XGBoost')
-    # plt.gca().invert_yaxis()
-    # plt.tight_layout()
-    # plt.show()
 
 if __name__ == "__main__":
     main()
